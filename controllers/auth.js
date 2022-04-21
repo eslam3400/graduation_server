@@ -1,9 +1,14 @@
 const User = require("../models/user.model");
 
 exports.register = async (req, res) => {
-  const user = new User(req.body);
-  await user.save();
-  res.status(201).json({ "msg": "user created successfully :D" });
+  const { username, email, phone } = req.body;
+  const userExist = await User.findOne({ $or: [{ username }, { email }, { phone }] }).exec();
+  if (userExist) res.status(406).json({ "msg": "username or email or phone is already in use" });
+  else {
+    const user = new User(req.body);
+    await user.save();
+    res.status(201).json({ "msg": "user created successfully :D" });
+  }
 }
 
 exports.login = async (req, res) => {
